@@ -26,28 +26,12 @@ def init_db():
                     video_path TEXT,
                     FOREIGN KEY(user_id) REFERENCES users(id)
                 )''')
-    c.execute('''CREATE TABLE IF NOT EXISTS friends (
-                    user_id INTEGER,
-                    friend_id INTEGER,
-                    status TEXT,
-                    FOREIGN KEY(user_id) REFERENCES users(id),
-                    FOREIGN KEY(friend_id) REFERENCES users(id)
-                )''')
     conn.commit()
     conn.close()
 
-# Additional database setup for advanced features
 def init_advanced_db():
     conn = sqlite3.connect("app.db")
     c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS notifications (
-                    id INTEGER PRIMARY KEY,
-                    user_id INTEGER,
-                    message TEXT,
-                    timestamp TEXT,
-                    is_read BOOLEAN DEFAULT 0,
-                    FOREIGN KEY(user_id) REFERENCES users(id)
-                )''')
     c.execute('''CREATE TABLE IF NOT EXISTS likes (
                     id INTEGER PRIMARY KEY,
                     user_id INTEGER,
@@ -64,26 +48,6 @@ def init_advanced_db():
                     timestamp TEXT,
                     FOREIGN KEY(user_id) REFERENCES users(id),
                     FOREIGN KEY(post_id) REFERENCES posts(id)
-                )''')
-    c.execute('''CREATE TABLE IF NOT EXISTS user_settings (
-                    user_id INTEGER PRIMARY KEY,
-                    theme TEXT DEFAULT 'light',
-                    language TEXT DEFAULT 'en',
-                    notifications_enabled BOOLEAN DEFAULT 1,
-                    FOREIGN KEY(user_id) REFERENCES users(id)
-                )''')
-    c.execute('''CREATE TABLE IF NOT EXISTS personal_messages (
-                    id INTEGER PRIMARY KEY,
-                    sender TEXT,
-                    recipient TEXT,
-                    content TEXT,
-                    timestamp TEXT
-                )''')
-    c.execute('''CREATE TABLE IF NOT EXISTS suggestions (
-                    id INTEGER PRIMARY KEY,
-                    user TEXT,
-                    suggestion TEXT,
-                    timestamp TEXT
                 )''')
     conn.commit()
     conn.close()
