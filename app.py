@@ -366,6 +366,23 @@ def ziryge_ai_chat():
             ai_response = response['choices'][0]['message']['content'].strip()
             st.write(f"Ziryge AI: {ai_response}")
 
+# Define the missing functions
+
+def personal_chat():
+    st.subheader("Personal Chat")
+    st.write("This feature allows users to chat privately.")
+
+
+def admin_panel():
+    st.subheader("Admin Panel")
+    st.write("This feature allows admins to manage users and posts.")
+
+
+def community_updates():
+    st.subheader("Community Updates")
+    st.write("This section allows users to suggest new features or improvements.")
+
+
 # Enhanced main app
 def main():
     init_db()
