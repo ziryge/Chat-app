@@ -2,7 +2,6 @@ import streamlit as st
 from datetime import datetime
 import sqlite3
 import hashlib
-import openai
 
 # Streamlit app configuration
 st.set_page_config(page_title="Social Chat App", layout="wide")
@@ -24,6 +23,7 @@ def init_db():
                     user_id INTEGER,
                     content TEXT,
                     timestamp TEXT,
+                    video_path TEXT,
                     FOREIGN KEY(user_id) REFERENCES users(id)
                 )''')
     c.execute('''CREATE TABLE IF NOT EXISTS friends (
@@ -173,13 +173,22 @@ def user_profile():
 def create_and_display_posts():
     st.subheader("Create a Post")
     post_content = st.text_area("What's on your mind?", key="post_input")
+    video_file = st.file_uploader("Upload a video (optional):", type=["mp4", "mov", "avi"], key="video_input")
     if st.button("Post"):
-        if post_content:
+        if post_content or video_file:
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             conn = sqlite3.connect("app.db")
             c = conn.cursor()
             c.execute("INSERT INTO posts (user_id, content, timestamp) VALUES ((SELECT id FROM users WHERE username = ?), ?, ?)",
                       (st.session_state["current_user"], post_content, timestamp))
+            post_id = c.lastrowid
+
+            if video_file:
+                video_path = f"videos/{post_id}_{video_file.name}"
+                with open(video_path, "wb") as f:
+                    f.write(video_file.read())
+                c.execute("UPDATE posts SET video_path = ? WHERE id = ?", (video_path, post_id))
+
             conn.commit()
             conn.close()
             st.success("Post created successfully!")
@@ -187,12 +196,62 @@ def create_and_display_posts():
     st.subheader("Posts")
     conn = sqlite3.connect("app.db")
     c = conn.cursor()
-    c.execute("SELECT users.username, posts.content, posts.timestamp FROM posts JOIN users ON posts.user_id = users.id ORDER BY posts.timestamp DESC")
+    c.execute("SELECT users.username, posts.content, posts.timestamp, posts.video_path FROM posts JOIN users ON posts.user_id = users.id ORDER BY posts.timestamp DESC")
     posts = c.fetchall()
     conn.close()
 
-    for username, content, timestamp in posts:
+    for username, content, timestamp, video_path in posts:
         st.markdown(f"**{username}:** {content} ({timestamp})")
+        if video_path:
+            st.video(video_path)
+
+# Add likes and comments functionality
+
+def like_post(post_id):
+    conn = sqlite3.connect("app.db")
+    c = conn.cursor()
+    c.execute("INSERT INTO likes (user_id, post_id, timestamp) VALUES ((SELECT id FROM users WHERE username = ?), ?, ?)",
+              (st.session_state["current_user"], post_id, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+    conn.commit()
+    conn.close()
+
+def comment_on_post(post_id, comment):
+    conn = sqlite3.connect("app.db")
+    c = conn.cursor()
+    c.execute("INSERT INTO comments (user_id, post_id, content, timestamp) VALUES ((SELECT id FROM users WHERE username = ?), ?, ?, ?)",
+              (st.session_state["current_user"], post_id, comment, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+    conn.commit()
+    conn.close()
+
+# Update post display to include likes and comments
+
+def display_post_interactions(post_id):
+    conn = sqlite3.connect("app.db")
+    c = conn.cursor()
+
+    # Display likes
+    c.execute("SELECT COUNT(*) FROM likes WHERE post_id = ?", (post_id,))
+    like_count = c.fetchone()[0]
+    st.write(f"Likes: {like_count}")
+    if st.button(f"Like Post {post_id}"):
+        like_post(post_id)
+        st.success("You liked this post!")
+
+    # Display comments
+    st.write("Comments:")
+    c.execute("SELECT users.username, comments.content, comments.timestamp FROM comments JOIN users ON comments.user_id = users.id WHERE comments.post_id = ? ORDER BY comments.timestamp DESC", (post_id,))
+    comments = c.fetchall()
+    for username, content, timestamp in comments:
+        st.markdown(f"**{username}:** {content} ({timestamp})")
+
+    # Add a new comment
+    new_comment = st.text_input(f"Add a comment to Post {post_id}:", key=f"comment_input_{post_id}")
+    if st.button(f"Comment on Post {post_id}"):
+        if new_comment:
+            comment_on_post(post_id, new_comment)
+            st.success("Comment added successfully!")
+
+    conn.close()
 
 # Friend requests
 def friend_requests():
@@ -346,43 +405,6 @@ def save_suggestion(user, suggestion):
     conn.commit()
     conn.close()
 
-# AI Chatbot Integration
-openai.api_key = "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"
-
-def ziryge_ai_chat():
-    st.subheader("Ziryge AI Chat")
-    st.write("Chat with Ziryge AI, your fun and personal assistant!")
-
-    user_input = st.text_input("You:", key="ai_input")
-    if st.button("Send"):
-        if user_input:
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are Ziryge AI, a fun and personal assistant created by Ziryge."},
-                    {"role": "user", "content": user_input}
-                ]
-            )
-            ai_response = response['choices'][0]['message']['content'].strip()
-            st.write(f"Ziryge AI: {ai_response}")
-
-# Define the missing functions
-
-def personal_chat():
-    st.subheader("Personal Chat")
-    st.write("This feature allows users to chat privately.")
-
-
-def admin_panel():
-    st.subheader("Admin Panel")
-    st.write("This feature allows admins to manage users and posts.")
-
-
-def community_updates():
-    st.subheader("Community Updates")
-    st.write("This section allows users to suggest new features or improvements.")
-
-
 # Enhanced main app
 def main():
     init_db()
@@ -399,7 +421,6 @@ def main():
         personal_chat()
         admin_panel()
         community_updates()
-        ziryge_ai_chat()
 
     save_session_state()
     auto_refresh(interval=5)  # Use auto-refresh for periodic updates
