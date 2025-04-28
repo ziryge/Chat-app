@@ -297,11 +297,11 @@ def load_session_state():
 # Call these functions at the start and end of the app
 load_session_state()
 
-# Replace deprecated st.experimental_set_query_params with st.query_params
+# Fix auto_refresh function to use st.experimental_set_query_params
 
 def auto_refresh(interval=5):
     st.write(f"Refreshing every {interval} seconds...")
-    st.query_params(refresh=str(interval))
+    st.experimental_set_query_params(refresh=str(interval))
 
 # Define the missing functions
 
