@@ -115,7 +115,12 @@ def login_user(username, password):
     return user
 
 # Enhanced user authentication with email verification
+
 def enhanced_user_auth():
+    if "current_user" in st.session_state:
+        st.sidebar.write(f"Logged in as: {st.session_state['current_user']}")
+        return
+
     st.sidebar.subheader("User Authentication")
     auth_choice = st.sidebar.radio("Choose an option:", ["Login", "Register"])
 
@@ -127,28 +132,6 @@ def enhanced_user_auth():
             if username and email and password:
                 register_user(username, password)
                 st.success("Registration successful! Please verify your email.")
-
-    elif auth_choice == "Login":
-        username = st.sidebar.text_input("Username")
-        password = st.sidebar.text_input("Password", type="password")
-        if st.sidebar.button("Login"):
-            user = login_user(username, password)
-            if user:
-                st.session_state["current_user"] = user[1]
-                st.success(f"Welcome, {user[1]}!")
-            else:
-                st.error("Invalid username or password.")
-
-# User registration and login
-def user_auth():
-    st.sidebar.subheader("User Authentication")
-    auth_choice = st.sidebar.radio("Choose an option:", ["Login", "Register"])
-
-    if auth_choice == "Register":
-        username = st.sidebar.text_input("Username")
-        password = st.sidebar.text_input("Password", type="password")
-        if st.sidebar.button("Register"):
-            register_user(username, password)
 
     elif auth_choice == "Login":
         username = st.sidebar.text_input("Username")
@@ -301,23 +284,50 @@ load_session_state()
 
 def auto_refresh(interval=5):
     st.write(f"Refreshing every {interval} seconds...")
-    st.experimental_set_query_params(refresh=str(interval))
+    st.query_params(refresh=str(interval))
 
 # Define the missing functions
 
 def personal_chat():
     st.subheader("Personal Chat")
-    st.write("This feature allows users to chat privately.")
+    recipient = st.selectbox("Select a user to chat with:", get_all_users())
+    chat_input = st.text_input("Type your message:")
+    if st.button("Send Message"):
+        if recipient and chat_input:
+            save_personal_message(st.session_state["current_user"], recipient, chat_input)
+            st.success("Message sent!")
 
+    st.subheader("Chat History")
+    if recipient:
+        messages = get_personal_messages(st.session_state["current_user"], recipient)
+        for sender, content, timestamp in messages:
+            st.markdown(f"**{sender}:** {content} ({timestamp})")
 
 def admin_panel():
     st.subheader("Admin Panel")
-    st.write("This feature allows admins to manage users and posts.")
+    admin_code = st.text_input("Enter admin code:", type="password")
+    if admin_code == "6022584":
+        st.success("Admin access granted!")
+        action = st.selectbox("Select an action:", ["Ban User", "Delete Post"])
 
+        if action == "Ban User":
+            user_to_ban = st.selectbox("Select a user to ban:", get_all_users())
+            if st.button("Ban User"):
+                ban_user(user_to_ban)
+                st.success(f"User {user_to_ban} has been banned.")
+
+        elif action == "Delete Post":
+            post_to_delete = st.selectbox("Select a post to delete:", get_all_posts())
+            if st.button("Delete Post"):
+                delete_post(post_to_delete)
+                st.success("Post deleted successfully.")
 
 def community_updates():
     st.subheader("Community Updates")
-    st.write("This section allows users to suggest new features or improvements.")
+    suggestion = st.text_area("Suggest a feature or improvement:")
+    if st.button("Submit Suggestion"):
+        save_suggestion(st.session_state["current_user"], suggestion)
+        st.success("Thank you for your suggestion!")
 
 # AI Chatbot Integration
 openai.api_key = "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"
