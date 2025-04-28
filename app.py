@@ -283,6 +283,11 @@ def load_session_state():
 # Call these functions at the start and end of the app
 load_session_state()
 
+# Add auto-refresh functionality for real-time updates
+
+def auto_refresh(interval=5):
+    st.experimental_rerun()
+
 # Enhanced main app
 def main():
     init_db()
@@ -298,6 +303,7 @@ def main():
         display_notifications()
 
     save_session_state()
+    st.experimental_rerun()  # Automatically refresh the page every 5 seconds
 
 if __name__ == "__main__":
     main()
