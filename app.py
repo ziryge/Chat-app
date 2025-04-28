@@ -297,11 +297,11 @@ def load_session_state():
 # Call these functions at the start and end of the app
 load_session_state()
 
-# Replace experimental_rerun with an alternative for auto-refresh
+# Replace deprecated st.experimental_set_query_params with st.query_params
 
 def auto_refresh(interval=5):
     st.write(f"Refreshing every {interval} seconds...")
-    st.experimental_set_query_params(refresh=str(interval))
+    st.query_params(refresh=str(interval))
 
 # Define the missing functions
 
@@ -329,12 +329,14 @@ def ziryge_ai_chat():
     user_input = st.text_input("You:", key="ai_input")
     if st.button("Send"):
         if user_input:
-            response = openai.Completion.create(
-                engine="text-davinci-003",
-                prompt=f"You are Ziryge AI, a fun and personal assistant created by Ziryge. Respond to the following user input with a fun and engaging personality.\nUser: {user_input}\nZiryge AI:",
-                max_tokens=150
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are Ziryge AI, a fun and personal assistant created by Ziryge."},
+                    {"role": "user", "content": user_input}
+                ]
             )
-            ai_response = response.choices[0].text.strip()
+            ai_response = response['choices'][0]['message']['content'].strip()
             st.write(f"Ziryge AI: {ai_response}")
 
 # Enhanced main app
