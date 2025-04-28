@@ -286,48 +286,65 @@ def auto_refresh(interval=5):
     st.write(f"Refreshing every {interval} seconds...")
     st.query_params(refresh=str(interval))
 
-# Define the missing functions
+# Helper functions for personal chat and admin panel
 
-def personal_chat():
-    st.subheader("Personal Chat")
-    recipient = st.selectbox("Select a user to chat with:", get_all_users())
-    chat_input = st.text_input("Type your message:")
-    if st.button("Send Message"):
-        if recipient and chat_input:
-            save_personal_message(st.session_state["current_user"], recipient, chat_input)
-            st.success("Message sent!")
+def get_all_users():
+    conn = sqlite3.connect("app.db")
+    c = conn.cursor()
+    c.execute("SELECT username FROM users")
+    users = [row[0] for row in c.fetchall() if row[0] != st.session_state.get("current_user")]
+    conn.close()
+    return users if users else ["No other users"]
 
-    st.subheader("Chat History")
-    if recipient:
-        messages = get_personal_messages(st.session_state["current_user"], recipient)
-        for sender, content, timestamp in messages:
-            st.markdown(f"**{sender}:** {content} ({timestamp})")
+def save_personal_message(sender, recipient, content):
+    conn = sqlite3.connect("app.db")
+    c = conn.cursor()
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    c.execute("INSERT INTO personal_messages (sender, recipient, content, timestamp) VALUES (?, ?, ?, ?)",
+              (sender, recipient, content, timestamp))
+    conn.commit()
+    conn.close()
 
-def admin_panel():
-    st.subheader("Admin Panel")
-    admin_code = st.text_input("Enter admin code:", type="password")
-    if admin_code == "6022584":
-        st.success("Admin access granted!")
-        action = st.selectbox("Select an action:", ["Ban User", "Delete Post"])
+def get_personal_messages(user1, user2):
+    conn = sqlite3.connect("app.db")
+    c = conn.cursor()
+    c.execute("SELECT sender, content, timestamp FROM personal_messages WHERE (sender = ? AND recipient = ?) OR (sender = ? AND recipient = ?) ORDER BY timestamp",
+              (user1, user2, user2, user1))
+    messages = c.fetchall()
+    conn.close()
+    return messages
 
-        if action == "Ban User":
-            user_to_ban = st.selectbox("Select a user to ban:", get_all_users())
-            if st.button("Ban User"):
-                ban_user(user_to_ban)
-                st.success(f"User {user_to_ban} has been banned.")
+def ban_user(username):
+    conn = sqlite3.connect("app.db")
+    c = conn.cursor()
+    c.execute("DELETE FROM users WHERE username = ?", (username,))
+    conn.commit()
+    conn.close()
 
-        elif action == "Delete Post":
-            post_to_delete = st.selectbox("Select a post to delete:", get_all_posts())
-            if st.button("Delete Post"):
-                delete_post(post_to_delete)
-                st.success("Post deleted successfully.")
+def get_all_posts():
+    conn = sqlite3.connect("app.db")
+    c = conn.cursor()
+    c.execute("SELECT id, content FROM posts")
+    posts = [f"{row[0]}: {row[1][:30]}..." for row in c.fetchall()]
+    conn.close()
+    return posts if posts else ["No posts"]
 
-def community_updates():
-    st.subheader("Community Updates")
-    suggestion = st.text_area("Suggest a feature or improvement:")
-    if st.button("Submit Suggestion"):
-        save_suggestion(st.session_state["current_user"], suggestion)
-        st.success("Thank you for your suggestion!")
+def delete_post(post_id_str):
+    post_id = int(post_id_str.split(":")[0])
+    conn = sqlite3.connect("app.db")
+    c = conn.cursor()
+    c.execute("DELETE FROM posts WHERE id = ?", (post_id,))
+    conn.commit()
+    conn.close()
+
+def save_suggestion(user, suggestion):
+    conn = sqlite3.connect("app.db")
+    c = conn.cursor()
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    c.execute("INSERT INTO suggestions (user, suggestion, timestamp) VALUES (?, ?, ?)",
+              (user, suggestion, timestamp))
+    conn.commit()
+    conn.close()
 
 # AI Chatbot Integration
 openai.api_key = "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"
