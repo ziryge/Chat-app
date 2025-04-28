@@ -2,6 +2,7 @@ import streamlit as st
 from datetime import datetime
 import sqlite3
 import hashlib
+import openai
 
 # Streamlit app configuration
 st.set_page_config(page_title="Social Chat App", layout="wide")
@@ -302,6 +303,40 @@ def auto_refresh(interval=5):
     st.write(f"Refreshing every {interval} seconds...")
     st.experimental_set_query_params(refresh=str(interval))
 
+# Define the missing functions
+
+def personal_chat():
+    st.subheader("Personal Chat")
+    st.write("This feature allows users to chat privately.")
+
+
+def admin_panel():
+    st.subheader("Admin Panel")
+    st.write("This feature allows admins to manage users and posts.")
+
+
+def community_updates():
+    st.subheader("Community Updates")
+    st.write("This section allows users to suggest new features or improvements.")
+
+# AI Chatbot Integration
+openai.api_key = "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"
+
+def ziryge_ai_chat():
+    st.subheader("Ziryge AI Chat")
+    st.write("Chat with Ziryge AI, your fun and personal assistant!")
+
+    user_input = st.text_input("You:", key="ai_input")
+    if st.button("Send"):
+        if user_input:
+            response = openai.Completion.create(
+                engine="text-davinci-003",
+                prompt=f"You are Ziryge AI, a fun and personal assistant created by Ziryge. Respond to the following user input with a fun and engaging personality.\nUser: {user_input}\nZiryge AI:",
+                max_tokens=150
+            )
+            ai_response = response.choices[0].text.strip()
+            st.write(f"Ziryge AI: {ai_response}")
+
 # Enhanced main app
 def main():
     init_db()
@@ -318,6 +353,7 @@ def main():
         personal_chat()
         admin_panel()
         community_updates()
+        ziryge_ai_chat()
 
     save_session_state()
     auto_refresh(interval=5)  # Use auto-refresh for periodic updates
