@@ -2,70 +2,156 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f0f0f0;
+    background-color: #f5f8fa;
+    color: #14171a;
 }
 
+#main-container {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+}
+
+#sidebar {
+    width: 20%;
+    background-color: #ffffff;
+    border-right: 1px solid #e1e8ed;
+    padding: 20px;
+}
+
+#content {
+    width: 60%;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+#trending {
+    width: 20%;
+    background-color: #ffffff;
+    border-left: 1px solid #e1e8ed;
+    padding: 20px;
+}
+
+.post {
+    background-color: #ffffff;
+    border: 1px solid #e1e8ed;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.post-header {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.post-content {
+    margin-bottom: 10px;
+}
+
+.post-timestamp {
+    font-size: 0.8em;
+    color: #657786;
+}
+
+button {
+    background-color: #1da1f2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 15px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0d95e8;
+}
+
+/* Additional styles for advanced features */
+
+/* Notifications */
+.notification {
+    background-color: #fffae6;
+    border: 1px solid #ffe58f;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    font-size: 0.9em;
+    color: #856404;
+}
+
+/* User settings */
+.settings {
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+/* Comments */
+.comment {
+    background-color: #f1f3f5;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    font-size: 0.9em;
+}
+
+.comment-header {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.comment-content {
+    margin-bottom: 5px;
+}
+
+.comment-timestamp {
+    font-size: 0.8em;
+    color: #6c757d;
+}
+
+/* Styles for real-time chat */
+
 #chat-container {
-    width: 400px;
-    height: 600px;
     display: flex;
     flex-direction: column;
+    height: 400px;
     border: 1px solid #ccc;
     border-radius: 8px;
-    background-color: #fff;
     overflow: hidden;
 }
 
-#chat-display {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+#chat-box {
     flex: 1;
     padding: 10px;
     overflow-y: auto;
-    border-bottom: 1px solid #ccc;
+    background-color: #f9f9f9;
 }
 
-/* Updated styles for WhatsApp-like chat bubbles */
 .chat-message {
-    max-width: 70%;
-    margin: 5px 0;
-    padding: 10px;
-    border-radius: 10px;
-    position: relative;
-    word-wrap: break-word;
-}
-
-.chat-message.sent {
-    background-color: #dcf8c6;
-    align-self: flex-end;
-}
-
-.chat-message.received {
-    background-color: #fff;
-    border: 1px solid #ccc;
-    align-self: flex-start;
+    margin-bottom: 10px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    background-color: #e1f5fe;
 }
 
 .chat-message .timestamp {
     font-size: 0.8em;
     color: #888;
-    position: absolute;
-    bottom: 2px;
-    right: 10px;
+    float: right;
 }
 
 #chat-input {
     display: flex;
     padding: 10px;
-    background-color: #f9f9f9;
+    background-color: #fff;
+    border-top: 1px solid #ccc;
 }
 
-#message {
+#message-input {
     flex: 1;
     padding: 10px;
     border: 1px solid #ccc;

@@ -3,17 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatting Website</title>
+    <title>Social Chat App</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="chat-container">
-        <div id="chat-display"></div>
-        <div id="chat-input">
-            <input type="text" id="message" placeholder="Type a message...">
-            <button id="send-button">Send</button>
+    <div id="main-container">
+        <div id="sidebar">
+            <h2>Menu</h2>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Profile</a></li>
+                <li><a href="#">Messages</a></li>
+                <li><a href="#">Settings</a></li>
+            </ul>
+        </div>
+        <div id="content">
+            <h1>Welcome to Social Chat App</h1>
+            <div class="post">
+                <div class="post-header">User123</div>
+                <div class="post-content">This is a sample post content.</div>
+                <div class="post-timestamp">2025-04-28 12:00:00</div>
+            </div>
+            <div class="post">
+                <div class="post-header">User456</div>
+                <div class="post-content">Another example of a post.</div>
+                <div class="post-timestamp">2025-04-28 12:05:00</div>
+            </div>
+        </div>
+        <div id="trending">
+            <h2>Trending</h2>
+            <ul>
+                <li>#SocialMedia</li>
+                <li>#ChatApp</li>
+                <li>#TrendingNow</li>
+            </ul>
         </div>
     </div>
-    <script src="script.js"></script>
 </body>
 </html>

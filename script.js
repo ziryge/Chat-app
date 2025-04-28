@@ -1,29 +1,42 @@
-document.getElementById('send-button').addEventListener('click', function() {
-    const messageInput = document.getElementById('message');
-    const message = messageInput.value.trim();
+// JavaScript for real-time chat functionality
 
-    if (message) {
-        addMessage(message, 'sent');
+// WebSocket connection for real-time updates
+const socket = new WebSocket('ws://localhost:8000');
+
+socket.onopen = () => {
+    console.log('WebSocket connection established');
+};
+
+socket.onmessage = (event) => {
+    const message = JSON.parse(event.data);
+    displayMessage(message);
+};
+
+function sendMessage(content) {
+    const message = {
+        user: 'current_user', // Replace with dynamic user data
+        content: content,
+        timestamp: new Date().toISOString()
+    };
+    socket.send(JSON.stringify(message));
+    displayMessage(message);
+}
+
+function displayMessage(message) {
+    const chatBox = document.getElementById('chat-box');
+    const messageElement = document.createElement('div');
+    messageElement.className = 'chat-message';
+    messageElement.innerHTML = `<strong>${message.user}:</strong> ${message.content} <span class='timestamp'>${message.timestamp}</span>`;
+    chatBox.appendChild(messageElement);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// Event listener for sending messages
+document.getElementById('send-button').addEventListener('click', () => {
+    const messageInput = document.getElementById('message-input');
+    const content = messageInput.value;
+    if (content) {
+        sendMessage(content);
         messageInput.value = '';
-
-        // Simulate receiving a reply
-        setTimeout(() => {
-            addMessage('This is a reply!', 'received');
-        }, 1000);
     }
 });
-
-function addMessage(message, type) {
-    const chatDisplay = document.getElementById('chat-display');
-    const messageElement = document.createElement('div');
-    messageElement.textContent = message;
-    messageElement.className = `chat-message ${type}`;
-
-    const timestamp = document.createElement('span');
-    timestamp.className = 'timestamp';
-    timestamp.textContent = new Date().toLocaleTimeString();
-    messageElement.appendChild(timestamp);
-
-    chatDisplay.appendChild(messageElement);
-    chatDisplay.scrollTop = chatDisplay.scrollHeight;
-}
