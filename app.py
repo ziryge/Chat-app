@@ -284,7 +284,7 @@ load_session_state()
 
 def auto_refresh(interval=5):
     st.write(f"Refreshing every {interval} seconds...")
-    st.query_params(refresh=str(interval))
+    st.experimental_set_query_params(refresh=str(interval))
 
 # Helper functions for personal chat and admin panel
 
