@@ -71,6 +71,19 @@ def init_advanced_db():
                     notifications_enabled BOOLEAN DEFAULT 1,
                     FOREIGN KEY(user_id) REFERENCES users(id)
                 )''')
+    c.execute('''CREATE TABLE IF NOT EXISTS personal_messages (
+                    id INTEGER PRIMARY KEY,
+                    sender TEXT,
+                    recipient TEXT,
+                    content TEXT,
+                    timestamp TEXT
+                )''')
+    c.execute('''CREATE TABLE IF NOT EXISTS suggestions (
+                    id INTEGER PRIMARY KEY,
+                    user TEXT,
+                    suggestion TEXT,
+                    timestamp TEXT
+                )''')
     conn.commit()
     conn.close()
 
@@ -283,10 +296,11 @@ def load_session_state():
 # Call these functions at the start and end of the app
 load_session_state()
 
-# Add auto-refresh functionality for real-time updates
+# Replace experimental_rerun with an alternative for auto-refresh
 
 def auto_refresh(interval=5):
-    st.experimental_rerun()
+    st.write(f"Refreshing every {interval} seconds...")
+    st.experimental_set_query_params(refresh=str(interval))
 
 # Enhanced main app
 def main():
@@ -301,9 +315,12 @@ def main():
         friend_requests()
         trending_topics()
         display_notifications()
+        personal_chat()
+        admin_panel()
+        community_updates()
 
     save_session_state()
-    st.experimental_rerun()  # Automatically refresh the page every 5 seconds
+    auto_refresh(interval=5)  # Use auto-refresh for periodic updates
 
 if __name__ == "__main__":
     main()
